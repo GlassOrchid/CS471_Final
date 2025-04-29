@@ -30,8 +30,11 @@ df['is_top10'] = (df['awards_per_value'] >= threshold).astype(int)
 x = df.drop(columns=['awards_per_value', 'is_top10'])
 y = df['is_top10']
 
-# split the data into train and test sets (70/30)
-x_train, x_val, y_train, y_val = train_test_split(x, y, test_size=0.3, random_state=42, stratify=y)
+# split the data into train and test sets (80/20)
+x_temp, x_test, y_temp, y_test = train_test_split(x, y, test_size=0.2, random_state=42, stratify=y)
+# split training into training and validation 25 percent of training will be used for validation
+x_train, X_val, y_train, y_val = train_test_split(x_temp, y_temp, test_size=0.25, random_state=42, stratify=y_temp)
+
 
 # preprocessing - 
 # OneHotEncoder: categorical features
@@ -88,13 +91,18 @@ for param in grid_search.best_params_:
 
 print("Best cross-validation score:", grid_search.best_score_)
 
-# evaluate on the validation set
+# evaluate on the validation and test sets
 best_model = grid_search.best_estimator_
-y_val_pred = best_model.predict(x_val)
+y_val_pred = best_model.predict(X_val)
+y_test_pred = best_model.predict(x_test)
+
 
 # print the classification report for detailed performance metrics
-print("\nClassification Report:")
+print("Validation Set Results:\n")
 print(classification_report(y_val, y_val_pred))
+print("Test Set Results:\n")
+print(classification_report(y_test, y_test_pred))
+
 
 # generate and plot the confusion matrix
 cm = confusion_matrix(y_val, y_val_pred)
